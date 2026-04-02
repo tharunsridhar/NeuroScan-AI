@@ -215,19 +215,12 @@ Full list in `requirements.txt`.
 | PDF Export | 3-page tumor report / 2-page normal report |
 | History Dashboard | Per-session case log with DRI and lesion trust |
 
----
-
-## Classes
-
-`glioma` · `meningioma` · `pituitary` · `no_tumor`
 
 ---
 
 ## Author
 
 **Tharun Sridhar Natarajan**  
-B.Tech Computer Science — VIT Vellore  
-[github.com/tharunsridhar](https://github.com/tharunsridhar)
 
 ---
 
