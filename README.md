@@ -1,229 +1,259 @@
-# 🧠 NeuroScan AI — Brain Tumor MRI Analysis System
+<div align="center">
 
-> **Research & screening tool. Not intended for clinical diagnosis.**
+# NeuroScan AI
 
-NeuroScan AI is a full-stack deep learning pipeline for brain MRI analysis. It combines a 3-model classification ensemble, EfficientNet U-Net segmentation, Grad-CAM explainability, and Groq Llama-4 radiology report generation — all wrapped in a Streamlit interface deployed via Google Colab + ngrok.
+### Brain MRI Screening, Explainability, Reliability Gating, and Automated Reporting
 
----
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-F57C00?style=flat-square&logo=tensorflow&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-Image%20Processing-0C7BDC?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Research%20Ready-1E88E5?style=flat-square)
 
-## Pipeline Overview
+Research-focused MRI analysis system that combines multi-model tumor classification, lesion-aware fusion, segmentation, Grad-CAM explainability, diagnostic reliability scoring, Groq-based report generation, and PDF export in one Streamlit workflow.
+
+</div>
+
+> Important: This repository is built for research, screening, demonstrations, and workflow support. It is not a standalone clinical diagnosis system.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Why This Project Stands Out](#why-this-project-stands-out)
+- [System Preview](#system-preview)
+- [Pipeline](#pipeline)
+- [Model Stack](#model-stack)
+- [Results Gallery](#results-gallery)
+- [Repository Structure](#repository-structure)
+- [Core Modules](#core-modules)
+- [Setup](#setup)
+- [Testing](#testing)
+- [Strengths and Limitations](#strengths-and-limitations)
+- [Clinical Safety Note](#clinical-safety-note)
+
+## Overview
+
+NeuroScan AI is designed as a full MRI analysis workflow rather than a basic classifier demo. The app validates scan quality, classifies the scan with three models, refines confidence with lesion-aware fusion, segments the lesion, compares Grad-CAM evidence with the segmentation mask, estimates morphology and risk, applies a Diagnostic Reliability Index (DRI) gate, generates an imaging summary with Groq, and exports a PDF report.
+
+The current Streamlit interface includes:
+
+- `Dashboard` for MRI upload and full analysis
+- `Patient History` for previously processed cases
+- `Model Info` for model and imaging metadata
+
+## Why This Project Stands Out
+
+- `Closed-loop design`: classification is not treated as the final step; segmentation and overlap signals feed back into confidence and reliability.
+- `Lesion-aware fusion`: the ensemble is adjusted using scan quality, certainty, morphology, and explainability-derived trust.
+- `Reliability gating`: the repo includes a DRI-based acceptance layer instead of only returning a prediction.
+- `Reporting workflow`: results are turned into structured imaging text and downloadable PDF reports.
+- `Presentation-ready assets`: training curves, confusion matrices, classification reports, and architecture visuals are already included.
+
+## System Preview
+
+![System Architecture](docs/system_architecture.png)
+
+## Pipeline
+
+```text
+Input MRI
+  ->
+Scan quality validation
+  ->
+3-model classification
+  ->
+Adaptive lesion-aware fusion
+  ->
+Tumor segmentation
+  ->
+Grad-CAM heatmap generation
+  ->
+Tumor size + morphology analysis
+  ->
+Overlap consistency + DRI gate
+  ->
+Risk and urgency support
+  ->
+Groq imaging summary
+  ->
+PDF report export
 ```
-Upload MRI
-    │
-    ▼
-Step 0 │ Scan Quality Validation
-    │
-    ▼
-Step 1 │ Classification (EfficientNetV2-S · MobileNetV3 · ConvNeXt-Tiny)
-    │         ↓ raw probabilities
-    │   First-pass fusion ──► No Tumor? ──► Normal Report Path
-    │         ↓ Tumor detected
-    ▼
-Step 2 │ EfficientNetB4 Attention U-Net Segmentation  (BRISC 2025, Dice ~0.88)
-    │
-    ▼
-Step 3 │ Grad-CAM Explainability (EfficientNetV2-S backbone)
-    │
-    ▼
-Step 4 │ Lesion Metrics  →  Size · Shape · Mass Effect · XAI Overlap
-    │
-    ▼
-Step 5 │ Lesion-Aware Second-Pass Fusion (closed-loop, dynamic weighting)
-    │
-    ▼
-Step 6 │ Risk Scoring · DRI · RANO Assessment · Prior-Case Comparison
-         Groq Llama-4 Radiology Report Generation
-    │
-    ▼
-Step 7 │ PDF Export
-         ├── Tumor  → 3-page report
-         └── Normal → 2-page report
-```
 
----
+## Feature Summary
 
-## Classification Models
-
-| Model | Input Size | Role |
-|---|---|---|
-| EfficientNetV2-S | 384 × 384 | Primary — highest weight in fusion |
-| MobileNetV3 | 384 × 384 | Secondary ensemble member |
-| ConvNeXt-Tiny | 384 × 384 | Secondary ensemble member |
-
-Fusion uses **case-specific dynamic weighting** adjusted by scan quality and lesion context (area, diameter, irregularity, XAI overlap score).
-
-**Manual test results** on 4 held-out images:
-
-| True Label | EfficientNetV2-S | MobileNetV3 | ConvNeXt-Tiny |
-|---|---|---|---|
-| Glioma | ✅ 0.9657 | ✅ 0.7437 | ✅ 0.4528 |
-| Meningioma | ✅ 0.8944 | ✅ 0.8019 | ✅ 0.5716 |
-| Pituitary | ✅ 0.8575 | ✅ 0.7357 | ✅ 0.4762 |
-| No Tumor | ✅ 0.9217 | ✅ 0.9156 | ✅ 0.9349 |
-
----
-## Training Graphs
-
-**EfficientNetV2-S — Classification**
-
-![EfficientNetV2-S Training](docs/graphs/v2s_graph.png)
-
-**EfficientNetB4 Attention U-Net — Segmentation**
-
-![Segmentation Training](docs/graphs/Segmentation%20graph.png)
----
-
-## Segmentation Model
-
-| Detail | Value |
+| Area | Capability |
 |---|---|
-| Architecture | EfficientNetB4 Attention U-Net |
-| Dataset | BRISC 2025 |
-| Test Dice Score | ~0.88 |
-| File | `brisc_effunet.keras` |
+| Classification | Predicts `glioma`, `meningioma`, `pituitary`, or `no_tumor` |
+| Fusion | Uses adaptive weighting based on confidence, entropy, quality, and lesion trust |
+| Segmentation | Produces a binary tumor mask for lesion localization |
+| Explainability | Generates Grad-CAM heatmaps for visual reasoning support |
+| Morphology | Estimates area, diameter, volume, irregularity, convexity, and mass effect |
+| Reliability | Computes DRI score, tier, escalation reasons, and gate decision |
+| Risk Support | Produces severity, progression risk, urgency, and clinical steps |
+| Reporting | Builds structured AI summaries and PDF reports |
+| History | Saves prior cases and compares progression where available |
 
----
+## Model Stack
 
-## Diagnostic Reliability Index (DRI)
+| Model | Role | Input Size |
+|---|---|---:|
+| EfficientNetV2-S | primary classifier | 384 x 384 |
+| MobileNetV3 | ensemble classifier | 384 x 384 |
+| ConvNeXt Tiny | ensemble classifier | 384 x 384 |
+| EfficientNet-based U-Net | segmentation model | 256 x 256 |
 
-The DRI is a composite score computed from 7 signals:
+Classification targets:
 
-- Scan quality
-- Model agreement
-- Fused confidence
-- Class margin
-- XAI consistency (Grad-CAM ↔ segmentation overlap)
-- Risk (inverted)
-- Lesion trust multiplier
+- `glioma`
+- `meningioma`
+- `no_tumor`
+- `pituitary`
 
-Results are tiered as **HIGH / MODERATE / LOW** with auto-escalation flags surfaced in the UI.
+## Results Gallery
 
----
+The repository already contains visual results inside [`docs/`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/docs), making it easier to present the project publicly.
+
+### Architecture
+
+![Architecture](docs/system_architecture.png)
+
+### EfficientNetV2-S
+
+![EfficientNetV2-S Graph](docs/v2s%20graph.png)
+![EfficientNetV2-S Confusion Matrix](docs/v2s%20confustion%20matrix.png)
+![EfficientNetV2-S Classification Report](docs/V2S%20CR.png)
+![EfficientNetV2-S Test Output](docs/v2s%20testing.png)
+
+### MobileNetV3
+
+![MobileNetV3 Graph](docs/mobilenet%20graph.png)
+![MobileNetV3 Confusion Matrix](docs/mobilenet%20cm.png)
+![MobileNetV3 Classification Report](docs/mobilenet%20CR.png)
+![MobileNetV3 Test Output](docs/mobilenet%20testing.png)
+
+### ConvNeXt Tiny
+
+![ConvNeXt Tiny Graph](docs/ConvNext%20tiny%20graphs.png)
+![ConvNeXt Tiny Confusion Matrix](docs/convNext%20tiny%20confustion%20matrix.png)
+![ConvNeXt Tiny Classification Report](docs/convNext%20tiny%20CR.png)
+![ConvNeXt Tiny Test Output](docs/ConvNext%20Tiny%20Test.png)
+
+### Segmentation
+
+![Segmentation Graph](docs/Segmentation%20graph.png)
+![Segmentation Test Output](docs/Segmentation%20test.png)
 
 ## Repository Structure
-```
-Brain-Tumor-MRI-AI-Analysis-System/
-├── app.py                          # Streamlit UI + model loading
-├── features.py                     # All analysis logic
-├── deployment.py                   # Colab + ngrok launcher
-├── config.py                       # Paths, keys, constants
-├── requirements.txt
-├── models/
-│   └── README.md                   # Model download instructions
-├── notebooks/
-│   ├── data_cleaning/
-│   │   ├── classification_dataset_checking.ipynb
-│   │   ├── segmentation_data_check.ipynb
-│   │   └── segmentation_dataset_cleaning.ipynb
-│   ├── classification_training/
-│   │   ├── efficientnetv2s_training.ipynb
-│   │   ├── mobilenetv3_training.ipynb
-│   │   └── convnext_tiny_training.ipynb
-│   ├── segmentation_training/
-│   │   └── segmentation_model_training.ipynb
-│   ├── testing_and_validation/
-│   │   └── classification_testing.ipynb
-│   └── deployment_prototype/
-│       └── final_deployment_notebook.ipynb
-├── sample_data/
-│   ├── test_glioma.jpg
-│   ├── test_meningioma.jpg
-│   ├── test_pituitary.jpg
-│   └── test_no_tumor.jpg
-├── docs/
-│   ├── confusion_matrices/
-│   ├── graphs/
-│   ├── screenshots/
-│   ├── sample_outputs/
-│   ├── architecture.md
-│   ├── dataset.md
-│   ├── results.md
-│   └── setup.md
-└── tests/
+
+```text
+Code/
+|-- app/           Streamlit interface and workflow orchestration
+|-- core/          fusion, segmentation, explainability, morphology, risk, reliability
+|-- reporting/     LLM report generation and PDF export
+|-- utils/         config, history, and I/O helpers
+|-- training/      model training scripts
+|-- experiments/   notebooks for validation and benchmarking
+|-- tests/         pytest checks
+|-- deploy/        deployment utilities
+|-- docs/          architecture diagram and result images
+|-- sample_data/   repository-local sample assets
+|-- requirements.txt
+`-- README.md
 ```
 
----
+## Core Modules
 
-## Setup & Deployment
+- [`app/app.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/app/app.py): Streamlit UI and end-to-end workflow
+- [`core/classifier_fusion.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/classifier_fusion.py): multi-model prediction, adaptive fusion, lesion trust
+- [`core/segmentation.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/segmentation.py): segmentation inference and mask generation
+- [`core/diagnostic_reliability.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/diagnostic_reliability.py): DRI scoring, tiering, and escalation logic
+- [`core/risk_engine.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/risk_engine.py): severity, urgency, progression, and decision support
+- [`reporting/llm_report_generator.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/reporting/llm_report_generator.py): Groq-based imaging summary generation
+- [`reporting/pdf_report_generator.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/reporting/pdf_report_generator.py): report visualization and PDF export
+- [`utils/config.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/utils/config.py): paths, constants, and model loading
+- [`utils/history_manager.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/utils/history_manager.py): local history persistence and prior-case comparison
 
-Full setup instructions are in [`docs/setup.md`](docs/setup.md). Quick start below.
+## Setup
 
-### 1. Mount Google Drive and place models
-```
-MyDrive/Project work/models/
-├── Classification/
-│   ├── Tumor_v2s_clean.keras
-│   ├── class_Tumor_mobilenet_v3.keras
-│   └── class_Tumor_convnext_tiny_tumor.keras
-└── new Segmentation/
-    └── brisc_effunet.keras
-```
+### 1. Install dependencies
 
-### 2. Set your Groq API key
-
-In Google Colab, add a secret named `GROQ_API_KEY`:
-```python
-from google.colab import userdata
-GROQ_API_KEY = userdata.get("GROQ_API_KEY")
-```
-
-**Never hardcode API keys in notebooks.**
-
-### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run via deployment notebook
+Main packages include TensorFlow, Streamlit, OpenCV, NumPy, pandas, Pillow, fpdf2, Groq, matplotlib, requests, and pytest.
 
-Open `notebooks/deployment_prototype/final_deployment_notebook.ipynb` in Colab and run all cells. The ngrok URL will appear in the output.
+### 2. Configure secrets
 
----
+The project uses `.env` in the repository root for local secrets.
 
-## Requirements
-```
-tensorflow>=2.15
-streamlit
-opencv-python
-Pillow
-numpy
-pandas
-fpdf2
-groq
-pyngrok
+Create `.env` with:
+
+```env
+GROQ_API_KEY=your_key_here
+NGROK_TOKEN=your_token_here
 ```
 
-Full list in `requirements.txt`.
+Use [`.env.example`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/.env.example) as the safe template. The config also keeps legacy support for `env.txt`, but `.env` is now the standard format.
 
----
+### 3. Prepare external directories
 
-## Features at a Glance
+For full functionality, the project expects these folders beside `Code/`:
 
-| Feature | Details |
-|---|---|
-| Classification | 3-model ensemble, weighted fusion |
-| Segmentation | EfficientNetB4 Attention U-Net, Dice ~0.88 |
-| Explainability | Grad-CAM on EfficientNetV2-S backbone |
-| Tumor Metrics | Area (cm²), diameter (cm), volume (cm³), bounding box |
-| Shape Analysis | Irregularity, solidity, aspect ratio |
-| Mass Effect | Midline shift detection |
-| XAI Overlap | Heatmap ↔ mask consistency score |
-| DRI | 7-component diagnostic reliability index |
-| Escalation Gate | Auto-rejection / uncertainty flagging |
-| Prior Comparison | Area change tracking across sessions |
-| LLM Report | Groq Llama-4 radiology narrative |
-| PDF Export | 3-page tumor report / 2-page normal report |
-| History Dashboard | Per-session case log with DRI and lesion trust |
+```text
+Brain Tumor Detection & Analysis/
+|-- Code/
+|-- Models/
+|-- Reports/
+|-- History/
+`-- Test Data/
+```
 
+Folder purposes:
 
----
+- `Models/` stores trained `.keras` weights
+- `Reports/` stores generated PDF reports
+- `History/` stores saved case history
+- `Test Data/` stores sample MRI images for the app selector
 
-## Author
+### 4. Run the app
 
-**Tharun Sridhar Natarajan**  
+```bash
+streamlit run app/app.py
+```
 
----
+## Testing
 
-## Disclaimer
+The repo currently includes lightweight tests for:
 
-This system is built for academic research and screening demonstrations only. It is **not validated for clinical use** and must not be used as a substitute for professional medical diagnosis.
+- quality metrics
+- adaptive fusion
+- diagnostic reliability gating
+- segmentation mask output validation
+
+Run them with:
+
+```bash
+pytest
+```
+
+## Strengths and Limitations
+
+### Strengths
+
+- modular codebase with clear separation between app, core logic, utilities, reporting, and tests
+- code-aware reliability layer that goes beyond plain classification confidence
+- built-in visual assets that help with demos, portfolio posts, and presentations
+- report generation pipeline that makes the project feel end-to-end
+- prior-case comparison support through local history tracking
+
+### Limitations
+
+- trained model files are external and not bundled in this repository
+- Groq-based reporting requires a valid `GROQ_API_KEY`
+- test coverage is useful but still lightweight
+- the project is suited to research and demonstration rather than direct clinical deployment
+
+## Clinical Safety Note
+
+All outputs should be treated as decision support only. Final diagnosis, tumor grading, treatment planning, and case interpretation must be confirmed by qualified clinicians and, when appropriate, histopathology.

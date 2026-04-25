@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+env.txt
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.pytest_cache/
+.ipynb_checkpoints/
+Reports/
+History/case_history.json
