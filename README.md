@@ -111,37 +111,18 @@ Classification targets:
 
 ## Results Gallery
 
-The repository already contains visual results inside [`docs/`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/docs), making it easier to present the project publicly.
+The repository includes visual results in [`docs/`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/docs). For a cleaner project presentation, this README highlights the primary classifier results from EfficientNetV2-S only.
 
 ### Architecture
 
 ![Architecture](docs/system_architecture.png)
 
-### EfficientNetV2-S
+### EfficientNetV2-S Highlights
 
 ![EfficientNetV2-S Graph](docs/v2s%20graph.png)
 ![EfficientNetV2-S Confusion Matrix](docs/v2s%20confustion%20matrix.png)
 ![EfficientNetV2-S Classification Report](docs/V2S%20CR.png)
 ![EfficientNetV2-S Test Output](docs/v2s%20testing.png)
-
-### MobileNetV3
-
-![MobileNetV3 Graph](docs/mobilenet%20graph.png)
-![MobileNetV3 Confusion Matrix](docs/mobilenet%20cm.png)
-![MobileNetV3 Classification Report](docs/mobilenet%20CR.png)
-![MobileNetV3 Test Output](docs/mobilenet%20testing.png)
-
-### ConvNeXt Tiny
-
-![ConvNeXt Tiny Graph](docs/ConvNext%20tiny%20graphs.png)
-![ConvNeXt Tiny Confusion Matrix](docs/convNext%20tiny%20confustion%20matrix.png)
-![ConvNeXt Tiny Classification Report](docs/convNext%20tiny%20CR.png)
-![ConvNeXt Tiny Test Output](docs/ConvNext%20Tiny%20Test.png)
-
-### Segmentation
-
-![Segmentation Graph](docs/Segmentation%20graph.png)
-![Segmentation Test Output](docs/Segmentation%20test.png)
 
 ## Repository Structure
 
