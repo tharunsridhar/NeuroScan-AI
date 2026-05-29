@@ -201,7 +201,7 @@ NeuroScan-AI/
 
 Folder purposes:
 
-- `MODEL/` stores trained `.keras` weights
+- `MODEL/` stores trained `.keras` weights. Download them from [Hugging Face](https://huggingface.co/tharunsridhar/brain_tumor_net-ensemble/tree/main/models), then place the files in `MODEL/`.
 - `Reports/` stores generated PDF reports
 - `History/` stores saved case history
 - `Test Data/` stores sample MRI images for the app selector
@@ -274,7 +274,7 @@ pytest
 
 ### Limitations
 
-- trained model files are external and not bundled in this repository
+- trained model files are external and not bundled in this repository. Download them from [Hugging Face](https://huggingface.co/tharunsridhar/brain_tumor_net-ensemble/tree/main/models).
 - Groq-based reporting requires a valid `GROQ_API_KEY`
 - test coverage is useful but still lightweight
 - the project is suited to research and demonstration rather than direct clinical deployment
