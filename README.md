@@ -5,12 +5,12 @@
 ### Brain MRI Screening, Explainability, Reliability Gating, and Automated Reporting
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-App-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-F57C00?style=flat-square&logo=tensorflow&logoColor=white)
 ![OpenCV](https://img.shields.io/badge/OpenCV-Image%20Processing-0C7BDC?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Research%20Ready-1E88E5?style=flat-square)
 
-Research-focused MRI analysis system that combines multi-model tumor classification, lesion-aware fusion, segmentation, Grad-CAM explainability, diagnostic reliability scoring, Groq-based report generation, and PDF export in one Streamlit workflow.
+Research-focused MRI analysis system that combines multi-model tumor classification, lesion-aware fusion, segmentation, Grad-CAM explainability, diagnostic reliability scoring, Groq-based report generation, and PDF export in one FastAPI workflow.
 
 </div>
 
@@ -35,11 +35,11 @@ Research-focused MRI analysis system that combines multi-model tumor classificat
 
 NeuroScan AI is designed as a full MRI analysis workflow rather than a basic classifier demo. The app validates scan quality, classifies the scan with three models, refines confidence with lesion-aware fusion, segments the lesion, compares Grad-CAM evidence with the segmentation mask, estimates morphology and risk, applies a Diagnostic Reliability Index (DRI) gate, generates an imaging summary with Groq, and exports a PDF report.
 
-The current Streamlit interface includes:
+The current FastAPI interface includes:
 
-- `Dashboard` for MRI upload and full analysis
-- `Patient History` for previously processed cases
-- `Model Info` for model and imaging metadata
+- `/` for MRI upload and full analysis
+- `/api/history` for previously processed cases
+- `/api/model-info` for model and imaging metadata
 
 ## Why This Project Stands Out
 
@@ -128,7 +128,7 @@ The repository includes visual results in [`docs/`](/D:/Brain%20Tumor%20Detectio
 
 ```text
 Code/
-|-- app/           Streamlit interface and workflow orchestration
+|-- app/           FastAPI interface and workflow orchestration
 |-- core/          fusion, segmentation, explainability, morphology, risk, reliability
 |-- reporting/     LLM report generation and PDF export
 |-- utils/         config, history, and I/O helpers
@@ -144,7 +144,8 @@ Code/
 
 ## Core Modules
 
-- [`app/app.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/app/app.py): Streamlit UI and end-to-end workflow
+- [`app/main.py`](app/main.py): FastAPI routes and upload page
+- [`app/pipeline.py`](app/pipeline.py): end-to-end MRI analysis workflow
 - [`core/classifier_fusion.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/classifier_fusion.py): multi-model prediction, adaptive fusion, lesion trust
 - [`core/segmentation.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/segmentation.py): segmentation inference and mask generation
 - [`core/diagnostic_reliability.py`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/core/diagnostic_reliability.py): DRI scoring, tiering, and escalation logic
@@ -156,15 +157,24 @@ Code/
 
 ## Setup
 
-### 1. Install dependencies
+### 1. Create and activate a virtual environment
 
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-Main packages include TensorFlow, Streamlit, OpenCV, NumPy, pandas, Pillow, fpdf2, Groq, matplotlib, requests, and pytest.
+Use Python 3.10, 3.11, or 3.12 for TensorFlow 2.16. Python 3.14 is not supported by the pinned TensorFlow build.
 
-### 2. Configure secrets
+### 2. Install dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Main packages include TensorFlow, FastAPI, Uvicorn, OpenCV, NumPy, pandas, Pillow, fpdf2, Groq, matplotlib, requests, and pytest.
+
+### 3. Configure secrets
 
 The project uses `.env` in the repository root for local secrets.
 
@@ -177,14 +187,13 @@ NGROK_TOKEN=your_token_here
 
 Use [`.env.example`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/.env.example) as the safe template. The config also keeps legacy support for `env.txt`, but `.env` is now the standard format.
 
-### 3. Prepare external directories
+### 4. Prepare project directories
 
-For full functionality, the project expects these folders beside `Code/`:
+For full functionality, the project expects these folders in the repository root:
 
 ```text
-Brain Tumor Detection & Analysis/
-|-- Code/
-|-- Models/
+NeuroScan-AI/
+|-- MODEL/
 |-- Reports/
 |-- History/
 `-- Test Data/
@@ -192,16 +201,51 @@ Brain Tumor Detection & Analysis/
 
 Folder purposes:
 
-- `Models/` stores trained `.keras` weights
+- `MODEL/` stores trained `.keras` weights
 - `Reports/` stores generated PDF reports
 - `History/` stores saved case history
 - `Test Data/` stores sample MRI images for the app selector
 
-### 4. Run the app
+### 5. Run the app
 
 ```bash
-streamlit run app/app.py
+uvicorn app.main:app --reload
 ```
+
+Open <http://127.0.0.1:8000> in your browser.
+
+For the already-created Windows virtual environment, prefer:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+## FastAPI Endpoints
+
+- `GET /health`: service health
+- `GET /ready`: model-file readiness check
+- `POST /api/analyze`: upload MRI image and receive JSON analysis plus PDF URL
+- `GET /api/history`: local analyzed-case history
+- `GET /api/reports`: generated PDF report list
+- `GET /api/reports/{filename}`: download one PDF report
+- `GET /api/model-info`: model classes, input sizes, MRI metadata, and model file paths
+- `GET /docs`: interactive Swagger documentation
+
+## Deployment
+
+Windows local service:
+
+```powershell
+.\deploy\start.ps1 -HostName 127.0.0.1 -Port 8000
+```
+
+Docker:
+
+```bash
+docker compose -f deploy/docker-compose.yml up --build
+```
+
+Deployment details are in [`deploy/README.md`](deploy/README.md).
 
 ## Testing
 

@@ -1,0 +1,17 @@
+.git
+.venv
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.env
+env.txt
+Reports/
+History/
+MODEL/*.keras
+MODEL/*.h5
+MODEL/*.hdf5
+MODEL/*.onnx
+experiments/
+training/
+docs/

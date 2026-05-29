@@ -1,0 +1,17 @@
+services:
+  neuroscan-api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: neuroscan-ai-api:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      NEUROSCAN_CORS_ORIGINS: "*"
+      NEUROSCAN_MAX_UPLOAD_MB: "25"
+    volumes:
+      - ../Reports:/app/Reports
+      - ../History:/app/History
+      - ../MODEL:/app/MODEL:ro

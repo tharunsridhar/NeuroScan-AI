@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: neuroscan-ai-api
+    env: docker
+    dockerfilePath: ./deploy/Dockerfile
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: NEUROSCAN_CORS_ORIGINS
+        value: "*"
+      - key: NEUROSCAN_MAX_UPLOAD_MB
+        value: "25"
+      - key: GROQ_API_KEY
+        sync: false

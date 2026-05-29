@@ -8,8 +8,12 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 warnings.filterwarnings("ignore")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = REPO_ROOT.parent
-MODELS_DIR = PROJECT_ROOT / "Models"
+PROJECT_ROOT = REPO_ROOT
+MODELS_DIR = Path(os.getenv("NEUROSCAN_MODELS_DIR", PROJECT_ROOT / "MODEL"))
+if not MODELS_DIR.exists():
+    legacy_models_dir = PROJECT_ROOT / "Models"
+    if legacy_models_dir.exists():
+        MODELS_DIR = legacy_models_dir
 REPORT_DIR = PROJECT_ROOT / "Reports"
 HISTORY_DIR = PROJECT_ROOT / "History"
 HISTORY_FILE = HISTORY_DIR / "case_history.json"
