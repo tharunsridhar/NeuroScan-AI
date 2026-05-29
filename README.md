@@ -182,7 +182,6 @@ Create `.env` with:
 
 ```env
 GROQ_API_KEY=your_key_here
-NGROK_TOKEN=your_token_here
 ```
 
 Use [`.env.example`](/D:/Brain%20Tumor%20Detection%20%26%20Analysis/Code/.env.example) as the safe template. The config also keeps legacy support for `env.txt`, but `.env` is now the standard format.
